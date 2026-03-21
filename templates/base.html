@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}AUHSE — Autonomous HSE Intelligence System{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}AI-assisted construction safety inspections. Detect hazards, assess risk, and generate structured HSE reports.{% endblock %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    <!-- Navbar -->
+    <header class="navbar" id="navbar">
+      <div class="navbar-inner">
+        <a href="{{ url_for('index') }}" class="navbar-brand">
+          <span class="brand-icon">AU</span>
+          <div class="brand-label">
+            <strong>AUHSE</strong>
+            <small>Autonomous HSE Intelligence</small>
+          </div>
+        </a>
+
+        <button class="navbar-toggle" id="navbar-toggle" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </button>
+
+        <nav class="navbar-nav" id="navbar-nav">
+          <a href="{{ url_for('index') }}#features" class="nav-link">Features</a>
+          <a href="{{ url_for('index') }}#how-it-works" class="nav-link">How It Works</a>
+          <a href="{{ url_for('contact') }}" class="nav-link">Contact</a>
+
+          {% if current_user.is_authenticated %}
+            <div class="nav-divider"></div>
+            <a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a>
+            <a href="{{ url_for('history') }}" class="nav-link">Reports</a>
+            <div class="nav-user-menu">
+              <button class="nav-user-btn" id="user-menu-btn">
+                <span class="nav-user-avatar">{{ current_user.full_name[0] | upper }}</span>
+                <span class="nav-user-name">{{ current_user.full_name }}</span>
+              </button>
+              <div class="nav-user-dropdown" id="user-dropdown">
+                <a href="{{ url_for('profile') }}">Account Settings</a>
+                <a href="{{ url_for('logout') }}">Sign Out</a>
+              </div>
+            </div>
+          {% else %}
+            <div class="nav-divider"></div>
+            <a href="{{ url_for('login') }}" class="nav-link">Sign In</a>
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Sign Up</a>
+          {% endif %}
+        </nav>
+      </div>
+    </header>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="toast-container" id="toast-container">
+          {% for category, message in messages %}
+            <div class="toast toast--{{ category }}">
+              <div class="toast-icon">
+                {% if category == 'error' %}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                {% elif category == 'warning' %}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                {% elif category == 'info' %}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                {% else %}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                {% endif %}
+              </div>
+              <span>{{ message }}</span>
+              <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+      {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    {% block footer %}
+    <footer class="site-footer">
+      <div class="footer-grid">
+        <div class="footer-col footer-brand-col">
+          <div class="footer-brand">
+            <span class="brand-icon brand-icon-sm">AU</span>
+            <strong>AUHSE</strong>
+          </div>
+          <p>AI-assisted construction safety inspections for modern HSE teams. Built for GCC compliance workflows.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="{{ url_for('index') }}#features">Features</a></li>
+            <li><a href="{{ url_for('index') }}#how-it-works">How It Works</a></li>
+            {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('new_inspection') }}">New Inspection</a></li>
+            {% endif %}
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Account</h4>
+          <ul>
+            {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('history') }}">Reports &amp; History</a></li>
+            <li><a href="{{ url_for('profile') }}">Settings</a></li>
+            {% else %}
+            <li><a href="{{ url_for('login') }}">Sign In</a></li>
+            <li><a href="{{ url_for('register') }}">Sign Up</a></li>
+            {% endif %}
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <ul>
+            <li><a href="{{ url_for('contact') }}">Contact Us</a></li>
+            <li><a href="mailto:mahmoudomar20030@gmail.com">mahmoudomar20030@gmail.com</a></li>
+          </ul>
+          <p class="footer-small">For demos, support, and partnership inquiries.</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 AUHSE. All rights reserved.</p>
+        <div class="footer-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+    </footer>
+    {% endblock %}
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

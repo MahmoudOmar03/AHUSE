@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}AUHSE — AI-Assisted Construction Safety Inspections{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-grid">
+    <div class="hero-text">
+      <div class="hero-tag">
+        <span class="hero-tag-dot"></span>
+        AI-Assisted HSE Platform
+      </div>
+      <h1>Faster, smarter <span>safety inspections</span> for construction sites</h1>
+      <p class="hero-desc">
+        Upload a site photo, detect hazards with AI, assess risk levels, and generate structured HSE compliance reports — all in one streamlined workflow.
+      </p>
+      <div class="hero-actions">
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('new_inspection') }}" class="btn btn-primary btn-lg">Start Inspection</a>
+          <a href="{{ url_for('history') }}" class="btn btn-secondary btn-lg">View Reports</a>
+        {% else %}
+          <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Get Started</a>
+          <a href="#how-it-works" class="btn btn-secondary btn-lg">See How It Works</a>
+        {% endif %}
+      </div>
+      <div class="hero-meta">
+        <div class="hero-meta-item">
+          <span class="hero-meta-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </span>
+          AI-powered hazard detection
+        </div>
+        <div class="hero-meta-item">
+          <span class="hero-meta-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </span>
+          DOCX report export
+        </div>
+        <div class="hero-meta-item">
+          <span class="hero-meta-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </span>
+          Results in seconds
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Preview Panel -->
+    <div class="hero-preview">
+      <div class="preview-header">
+        <span class="preview-dot preview-dot--red"></span>
+        <span class="preview-dot preview-dot--yellow"></span>
+        <span class="preview-dot preview-dot--green"></span>
+        <span class="preview-title">AUHSE — New Inspection</span>
+      </div>
+      <div class="preview-body">
+        <div class="preview-row">
+          <span class="preview-row-label">Project Name</span>
+          <span class="preview-row-value">Al Riyadh Tower — Phase 2</span>
+        </div>
+        <div class="preview-row">
+          <span class="preview-row-label">Site Location</span>
+          <span class="preview-row-value">Riyadh, KSA</span>
+        </div>
+        <div class="preview-row">
+          <span class="preview-row-label">Inspector</span>
+          <span class="preview-row-value">Ahmed Al-Farsi</span>
+        </div>
+        <div class="preview-upload-area">
+          <div class="preview-upload-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <div class="preview-upload-text">Drop site photo here</div>
+        </div>
+        <div class="preview-btn">Run Inspection</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Trust -->
+<section class="trust-section">
+  <div class="trust-inner">
+    <div class="trust-label">Built for modern construction safety teams</div>
+    <div class="trust-grid">
+      <div class="trust-item">
+        <div class="trust-stat">~30s</div>
+        <div class="trust-desc">Average report generation time from photo upload</div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-stat">5-Point</div>
+        <div class="trust-desc">Risk matrix with likelihood × severity scoring</div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-stat">DOCX</div>
+        <div class="trust-desc">Audit-ready reports for compliance documentation</div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-stat">GCC</div>
+        <div class="trust-desc">Designed for Saudi &amp; Middle East compliance workflows</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="features-section" id="features">
+  <div class="section-header">
+    <h2>What AUHSE does for your team</h2>
+    <p>A unified platform for inspection, detection, assessment, and reporting — built for real construction workflows.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon-wrap feature-icon-wrap--blue">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+      <h3>AI Hazard Detection</h3>
+      <p>YOLOv8 object detection identifies safety risks — missing PPE, exposed hazards, and non-compliance — directly from your site photos.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon-wrap feature-icon-wrap--amber">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <h3>Risk Assessment</h3>
+      <p>Automated likelihood × severity calculation with a structured risk matrix, following construction industry standards.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon-wrap feature-icon-wrap--green">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </div>
+      <h3>Compliance Reports</h3>
+      <p>Generate professional DOCX reports with hazard descriptions, control measures, and recommendations — ready for audits and filing.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon-wrap feature-icon-wrap--blue">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <h3>Inspection Archive &amp; History</h3>
+      <p>Every inspection is saved with full metadata — project, date, status, risk level, and downloadable reports. Search, filter, and retrieve any past inspection instantly.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon-wrap feature-icon-wrap--red">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      <h3>Photo Upload &amp; Export</h3>
+      <p>Drag-and-drop site photos, get structured results, and download reports in DOCX or JSON format.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon-wrap feature-icon-wrap--green">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <h3>Team &amp; Verification</h3>
+      <p>Track who inspected, who verified, and when. Built-in accountability for every field report your team generates.</p>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section class="how-section" id="how-it-works">
+  <div class="section-header">
+    <h2>How it works</h2>
+    <p>From photo to compliance report in four simple steps.</p>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-number">Step 01</div>
+      <h3>Create or select a project</h3>
+      <p>Enter project name, site location, and inspector details. Projects are saved for future inspections.</p>
+      <span class="step-connector"></span>
+    </div>
+    <div class="step-card">
+      <div class="step-number">Step 02</div>
+      <h3>Upload a site photo</h3>
+      <p>Upload site images (up to 20 files, 100 MB combined) or video (up to 250 MB), depending on mode. JPEG, PNG, WebP; MP4, WebM, MOV, and other common formats.</p>
+      <span class="step-connector"></span>
+    </div>
+    <div class="step-card">
+      <div class="step-number">Step 03</div>
+      <h3>Review AI-detected hazards</h3>
+      <p>The system identifies hazards, assesses risk using a likelihood × severity matrix, and recommends controls.</p>
+      <span class="step-connector"></span>
+    </div>
+    <div class="step-card">
+      <div class="step-number">Step 04</div>
+      <h3>Download the HSE report</h3>
+      <p>Download a professional compliance-ready DOCX report. Every inspection is saved to your history for future reference.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-inner">
+    <h2>Ready to streamline your field inspections?</h2>
+    <p>Create an account and run your first AI-assisted safety inspection in under a minute.</p>
+    <div class="cta-actions">
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('new_inspection') }}" class="btn btn-primary btn-lg">Start Inspection</a>
+      {% else %}
+        <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Create Free Account</a>
+        <a href="{{ url_for('contact') }}" class="btn btn-secondary btn-lg">Contact Us</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

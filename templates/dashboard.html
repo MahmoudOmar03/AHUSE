@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — AUHSE{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1>Dashboard</h1>
+      <p class="page-desc" style="color:var(--text-muted);">Welcome back, {{ current_user.full_name }}.</p>
+    </div>
+    <a href="{{ url_for('new_inspection') }}" class="btn btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Inspection
+    </a>
+  </div>
+</div>
+
+<div class="dashboard-grid">
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card stat-card--accent">
+      <div class="stat-value">{{ total_inspections }}</div>
+      <div class="stat-label">Total Inspections</div>
+    </div>
+    <div class="stat-card stat-card--success">
+      <div class="stat-value">{{ completed }}</div>
+      <div class="stat-label">Completed</div>
+    </div>
+    <div class="stat-card stat-card--warning">
+      <div class="stat-value">{{ pending }}</div>
+      <div class="stat-label">Pending / Processing</div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="section-title-bar">
+    <h3>Quick Actions</h3>
+  </div>
+  <div class="stats-row" style="margin-bottom:2rem;">
+    <a href="{{ url_for('new_inspection') }}" class="card" style="text-decoration:none;display:flex;align-items:center;gap:1rem;">
+      <div style="width:40px;height:40px;border-radius:var(--radius-md);background:var(--accent-subtle);display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <div>
+        <strong style="display:block;font-size:0.9rem;color:var(--text-primary);">New Inspection</strong>
+        <span style="font-size:0.8rem;color:var(--text-muted);">Upload a photo and run analysis</span>
+      </div>
+    </a>
+    <a href="{{ url_for('history') }}" class="card" style="text-decoration:none;display:flex;align-items:center;gap:1rem;">
+      <div style="width:40px;height:40px;border-radius:var(--radius-md);background:var(--status-success-bg);display:flex;align-items:center;justify-content:center;color:var(--status-success);flex-shrink:0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div>
+        <strong style="display:block;font-size:0.9rem;color:var(--text-primary);">View History</strong>
+        <span style="font-size:0.8rem;color:var(--text-muted);">Browse past inspections and reports</span>
+      </div>
+    </a>
+    <a href="{{ url_for('contact') }}" class="card" style="text-decoration:none;display:flex;align-items:center;gap:1rem;">
+      <div style="width:40px;height:40px;border-radius:var(--radius-md);background:var(--status-warning-bg);display:flex;align-items:center;justify-content:center;color:var(--status-warning);flex-shrink:0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </div>
+      <div>
+        <strong style="display:block;font-size:0.9rem;color:var(--text-primary);">Contact Support</strong>
+        <span style="font-size:0.8rem;color:var(--text-muted);">Reach out for demos or help</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- Recent Inspections -->
+  <div class="section-title-bar">
+    <h3>Recent Inspections</h3>
+    <a href="{{ url_for('history') }}" class="btn btn-ghost btn-sm">View All →</a>
+  </div>
+
+  {% if recent_inspections %}
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Project</th>
+          <th>Site</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Risk</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for insp in recent_inspections %}
+        <tr>
+          <td><strong>#{{ insp.id }}</strong></td>
+          <td><strong>{{ insp.project.project_name }}</strong></td>
+          <td>{{ insp.project.site_location }}</td>
+          <td>{{ insp.created_at.strftime('%b %d, %Y') }}</td>
+          <td>
+            {% if insp.status == 'completed' %}
+              <span class="badge badge--success"><span class="badge-dot"></span>Completed</span>
+            {% elif insp.status == 'processing' %}
+              <span class="badge badge--info"><span class="badge-dot"></span>Processing</span>
+            {% elif insp.status == 'failed' %}
+              <span class="badge badge--danger"><span class="badge-dot"></span>Failed</span>
+            {% else %}
+              <span class="badge badge--neutral"><span class="badge-dot"></span>Pending</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if insp.risk_level %}
+              {% if 'high' in insp.risk_level|lower or 'critical' in insp.risk_level|lower %}
+                <span class="badge badge--danger"><span class="badge-dot"></span>{{ insp.risk_level }}</span>
+              {% elif 'medium' in insp.risk_level|lower %}
+                <span class="badge badge--warning"><span class="badge-dot"></span>{{ insp.risk_level }}</span>
+              {% else %}
+                <span class="badge badge--success"><span class="badge-dot"></span>{{ insp.risk_level }}</span>
+              {% endif %}
+            {% else %}
+              <span style="color:var(--text-muted);">—</span>
+            {% endif %}
+          </td>
+          <td><a href="{{ url_for('inspection_detail', inspection_id=insp.id) }}" class="btn btn-ghost btn-sm">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon">📋</div>
+    <h3>No inspections yet</h3>
+    <p>Run your first AI-assisted safety inspection to see results here.</p>
+    <a href="{{ url_for('new_inspection') }}" class="btn btn-primary">Start Inspection</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

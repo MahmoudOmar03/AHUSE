@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% block title %}Inspection #{{ inspection.id }} — AUHSE{% endblock %}
+
+{% block content %}
+<div class="detail-page">
+  <div class="detail-header">
+    <div>
+      <h1>{{ inspection.project.project_name }}</h1>
+      <div class="detail-meta">
+        Inspection #{{ inspection.id }} · {{ inspection.project.site_location }} · {{ inspection.created_at.strftime('%B %d, %Y at %H:%M') }}
+      </div>
+    </div>
+    <div class="detail-actions">
+      {% if result_context.get('docx_url') %}
+        <a href="{{ result_context.docx_url }}" class="btn btn-primary btn-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download Report
+        </a>
+      {% endif %}
+      {% if result_context.get('json_url') %}
+        <a href="{{ result_context.json_url }}" class="btn btn-secondary btn-sm">Raw JSON</a>
+      {% endif %}
+      {% if video_json_url %}
+        <a href="{{ video_json_url }}" class="btn btn-secondary btn-sm">Video YOLO JSON</a>
+      {% endif %}
+      <a href="{{ url_for('history') }}" class="btn btn-ghost btn-sm">← Back to History</a>
+    </div>
+  </div>
+
+  <!-- Summary Row -->
+  <div class="stats-row" style="margin-bottom:1.5rem;">
+    <div class="stat-card">
+      <div class="stat-label">Status</div>
+      <div style="margin-top:0.5rem;">
+        {% if inspection.status == 'completed' %}
+          <span class="badge badge--success"><span class="badge-dot"></span>Completed</span>
+        {% elif inspection.status == 'processing' %}
+          <span class="badge badge--info"><span class="badge-dot"></span>Processing</span>
+        {% elif inspection.status == 'failed' %}
+          <span class="badge badge--danger"><span class="badge-dot"></span>Failed</span>
+        {% else %}
+          <span class="badge badge--neutral"><span class="badge-dot"></span>Pending</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Risk Level</div>
+      <div style="margin-top:0.5rem;">
+        {% if inspection.risk_level %}
+          {% if 'high' in inspection.risk_level|lower or 'critical' in inspection.risk_level|lower %}
+            <span class="badge badge--danger"><span class="badge-dot"></span>{{ inspection.risk_level }}</span>
+          {% elif 'medium' in inspection.risk_level|lower %}
+            <span class="badge badge--warning"><span class="badge-dot"></span>{{ inspection.risk_level }}</span>
+          {% else %}
+            <span class="badge badge--success"><span class="badge-dot"></span>{{ inspection.risk_level }}</span>
+          {% endif %}
+        {% else %}
+          <span style="color:var(--text-muted);">—</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Risk Score (L × S)</div>
+      <div class="stat-value" style="margin-top:0.25rem;">{{ inspection.risk_score or '—' }}</div>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <!-- Project Info -->
+    <div class="detail-section">
+      <div class="detail-section-title">Project Information</div>
+      <div class="detail-row">
+        <span class="detail-row-label">Project Name</span>
+        <span class="detail-row-value">{{ inspection.project.project_name }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-row-label">Site Location</span>
+        <span class="detail-row-value">{{ inspection.project.site_location }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-row-label">Inspected By</span>
+        <span class="detail-row-value">{{ inspection.inspected_by }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-row-label">Verified By</span>
+        <span class="detail-row-value">{{ inspection.verified_by }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-row-label">Date</span>
+        <span class="detail-row-value">{{ inspection.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+      </div>
+      {% if inspection.notes %}
+      <div class="detail-row">
+        <span class="detail-row-label">Notes</span>
+        <span class="detail-row-value">{{ inspection.notes }}</span>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Detections -->
+    <div class="detail-section">
+      <div class="detail-section-title">Detections</div>
+      {% if detections %}
+        <div class="detection-list">
+          {% for det in detections %}
+            <div class="detection-item">
+              <span class="detection-name">{{ det.hazard_type }}</span>
+              <div class="detection-bar-wrap"><div class="detection-bar-fill" style="width:{{ (det.confidence * 100)|int }}%"></div></div>
+              <span class="detection-conf">{{ "%.0f"|format(det.confidence * 100) }}%</span>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p style="font-size:0.85rem;color:var(--text-muted);">No object detections recorded.</p>
+      {% endif %}
+    </div>
+
+    {% if video_summary %}
+    <div class="detail-section full-width">
+      <div class="detail-section-title">Video analysis (YOLO)</div>
+      <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.75rem;">
+        Frame sampling over ~{{ video_summary.duration_sec }}s at {{ "%.1f"|format(video_summary.fps) }} FPS ({{ video_summary.total_samples }} samples).
+      </p>
+      {% if video_summary.unique_detected_objects %}
+      <div class="detail-row">
+        <span class="detail-row-label">Unique labels</span>
+        <span class="detail-row-value">{{ video_summary.unique_detected_objects | join(', ') }}</span>
+      </div>
+      {% endif %}
+      {% if video_summary.object_counts %}
+      <div class="detail-section-title" style="margin-top:1rem;">Detection counts (sampled frames)</div>
+      <ul style="font-size:0.85rem;color:var(--text-secondary);margin-left:1.25rem;list-style:disc;">
+        {% for name in video_summary.object_counts %}
+        <li><strong>{{ name }}</strong>: {{ video_summary.object_counts[name] }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+    {% elif inspection.video_path and not video_summary %}
+    <div class="detail-section full-width">
+      <div class="detail-section-title">Video</div>
+      <p style="font-size:0.85rem;color:var(--text-muted);">Video was uploaded; detailed YOLO summary is not available for this inspection.</p>
+    </div>
+    {% endif %}
+
+    {% if not hse_data and inspection.status == 'completed' and not report %}
+    <div class="detail-section full-width">
+      <p style="font-size:0.85rem;color:var(--text-muted);">This is a video-only run. There is no VLM-generated HSE DOCX/JSON; use the video YOLO summary above if present.</p>
+    </div>
+    {% endif %}
+
+    {% if hse_data %}
+    <!-- Hazards -->
+    <div class="detail-section full-width">
+      <div class="detail-section-title">Detected Hazards</div>
+      {% if hse_data.detected_hazards %}
+        {% for hazard in hse_data.detected_hazards %}
+          <div class="hazard-item">
+            <h4>{{ hazard.description_of_hazards }}</h4>
+            <div class="hazard-detail"><strong>Causes:</strong> {{ hazard.causes }}</div>
+            <div class="hazard-detail"><strong>Location:</strong> {{ hazard.location_on_site }}</div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p style="font-size:0.85rem;color:var(--text-muted);">No hazards documented in this report.</p>
+      {% endif %}
+    </div>
+
+    <!-- Risk Analysis -->
+    <div class="detail-section">
+      <div class="detail-section-title">Risk Analysis</div>
+      {% set ra = hse_data.get('risk_analysis', {}) %}
+      <div class="detail-row">
+        <span class="detail-row-label">Likelihood (1–5)</span>
+        <span class="detail-row-value">{{ ra.get('likelihood_1_to_5', '—') }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-row-label">Severity (1–5)</span>
+        <span class="detail-row-value">{{ ra.get('severity_1_to_5', '—') }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-row-label">Risk Rating (L × S)</span>
+        <span class="detail-row-value">{{ ra.get('risk_rating_lxS', '—') }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-row-label">Risk Level</span>
+        <span class="detail-row-value">{{ ra.get('risk_level', '—') }}</span>
+      </div>
+    </div>
+
+    <!-- Control Measures -->
+    <div class="detail-section">
+      <div class="detail-section-title">Control Measures</div>
+      {% set cm = hse_data.get('control_measures', {}) %}
+      <div class="control-item">
+        <div class="control-label">Elimination</div>
+        <div class="control-value">{{ cm.get('elimination', '—') }}</div>
+      </div>
+      <div class="control-item">
+        <div class="control-label">Substitution</div>
+        <div class="control-value">{{ cm.get('substitution', '—') }}</div>
+      </div>
+      <div class="control-item">
+        <div class="control-label">Engineering Controls</div>
+        <div class="control-value">{{ cm.get('engineering_controls', '—') }}</div>
+      </div>
+      <div class="control-item">
+        <div class="control-label">Administrative Controls</div>
+        <div class="control-value">{{ cm.get('administrative_controls', '—') }}</div>
+      </div>
+      <div class="control-item">
+        <div class="control-label">PPE</div>
+        <div class="control-value">{{ cm.get('personal_protective_equipment', '—') }}</div>
+      </div>
+    </div>
+
+    <!-- Recommendations -->
+    {% if hse_data.get('recommendations') %}
+    <div class="detail-section full-width">
+      <div class="detail-section-title">Recommendations</div>
+      {% set rec = hse_data.recommendations %}
+      <div class="detail-row">
+        <span class="detail-row-label">Immediate Actions</span>
+        <span class="detail-row-value">{{ rec.get('immediate_actions', '—') }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-row-label">Short-Term Measures</span>
+        <span class="detail-row-value">{{ rec.get('short_term_measures', '—') }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-row-label">Long-Term Measures</span>
+        <span class="detail-row-value">{{ rec.get('long_term_measures', '—') }}</span>
+      </div>
+    </div>
+    {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

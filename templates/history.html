@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Report History — AUHSE{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1>Report History</h1>
+      <p class="page-desc" style="color:var(--text-muted);">Browse, search, and download your past inspections and reports.</p>
+    </div>
+    <a href="{{ url_for('new_inspection') }}" class="btn btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Inspection
+    </a>
+  </div>
+</div>
+
+<div class="history-page">
+  <!-- Filters -->
+  <form method="get" action="{{ url_for('history') }}" class="filter-bar">
+    <input class="form-input" type="text" name="search" placeholder="Search by project, site, or inspector…" value="{{ search }}">
+    <select class="form-select" name="status" id="filter-status">
+      <option value="">All Statuses</option>
+      <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+      <option value="processing" {% if status_filter == 'processing' %}selected{% endif %}>Processing</option>
+      <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+      <option value="failed" {% if status_filter == 'failed' %}selected{% endif %}>Failed</option>
+    </select>
+    <select class="form-select" name="risk" id="filter-risk">
+      <option value="">All Risk Levels</option>
+      <option value="low" {% if risk_filter == 'low' %}selected{% endif %}>Low</option>
+      <option value="medium" {% if risk_filter == 'medium' %}selected{% endif %}>Medium</option>
+      <option value="high" {% if risk_filter == 'high' %}selected{% endif %}>High</option>
+      <option value="critical" {% if risk_filter == 'critical' %}selected{% endif %}>Critical</option>
+    </select>
+    <button type="submit" class="btn btn-secondary btn-sm">Filter</button>
+  </form>
+
+  {% if inspections %}
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Project</th>
+          <th>Site</th>
+          <th>Inspector</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Risk</th>
+          <th>Score</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for insp in inspections %}
+        <tr>
+          <td><strong>#{{ insp.id }}</strong></td>
+          <td><strong>{{ insp.project.project_name }}</strong></td>
+          <td>{{ insp.project.site_location }}</td>
+          <td>{{ insp.inspected_by }}</td>
+          <td>{{ insp.created_at.strftime('%b %d, %Y') }}</td>
+          <td>
+            {% if insp.status == 'completed' %}
+              <span class="badge badge--success"><span class="badge-dot"></span>Completed</span>
+            {% elif insp.status == 'processing' %}
+              <span class="badge badge--info"><span class="badge-dot"></span>Processing</span>
+            {% elif insp.status == 'failed' %}
+              <span class="badge badge--danger"><span class="badge-dot"></span>Failed</span>
+            {% else %}
+              <span class="badge badge--neutral"><span class="badge-dot"></span>Pending</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if insp.risk_level %}
+              {% if 'high' in insp.risk_level|lower or 'critical' in insp.risk_level|lower %}
+                <span class="badge badge--danger"><span class="badge-dot"></span>{{ insp.risk_level }}</span>
+              {% elif 'medium' in insp.risk_level|lower %}
+                <span class="badge badge--warning"><span class="badge-dot"></span>{{ insp.risk_level }}</span>
+              {% else %}
+                <span class="badge badge--success"><span class="badge-dot"></span>{{ insp.risk_level }}</span>
+              {% endif %}
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td>{{ insp.risk_score or '—' }}</td>
+          <td>
+            <a href="{{ url_for('inspection_detail', inspection_id=insp.id) }}" class="btn btn-ghost btn-sm">View</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon">🔍</div>
+    <h3>No inspections found</h3>
+    <p>{% if search or status_filter or risk_filter %}Try adjusting your search or filters.{% else %}Run your first inspection to see results here.{% endif %}</p>
+    {% if not search and not status_filter and not risk_filter %}
+      <a href="{{ url_for('new_inspection') }}" class="btn btn-primary">Start Inspection</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+.venv/
+*.egg-info/
+.eggs/
+dist/
+build/
+.DS_Store
+*.db-journal
+auhse.db
+uploads/*
+!uploads/.gitkeep
+outputs/*
+!outputs/.gitkeep
+.idea/
+.vscode/
+*.log
+
+# Local YOLO weights (use YOLO_API_* or place file locally; optional YOLO_USE_LOCAL=1)
+best.pt
+*.pt

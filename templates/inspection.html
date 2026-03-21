@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+{% block title %}New Inspection — AUHSE{% endblock %}
+
+{% block content %}
+<div class="inspection-page">
+  <div class="inspection-card">
+    <div class="inspection-card-header">
+      <h2>New Inspection</h2>
+      <p>Fill in project details, choose upload mode, then add images and/or video for AI-assisted safety analysis.</p>
+    </div>
+
+    <form method="post" action="{{ url_for('new_inspection') }}" enctype="multipart/form-data" id="inspection-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="project_name">Project Name</label>
+          <input class="form-input" type="text" id="project_name" name="project_name" placeholder="e.g. Al Riyadh Tower" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="site_location">Site Location</label>
+          <input class="form-input" type="text" id="site_location" name="site_location" placeholder="e.g. Riyadh, KSA" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="inspection_by">Inspection By</label>
+          <input class="form-input" type="text" id="inspection_by" name="inspection_by" placeholder="Inspector name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="verified_by">Verified By</label>
+          <input class="form-input" type="text" id="verified_by" name="verified_by" placeholder="Verifier name" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="notes">Notes <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
+        <textarea class="form-textarea" id="notes" name="notes" rows="3" placeholder="Any additional observations or context..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Upload mode</label>
+        <div class="upload-mode-row" role="radiogroup" aria-label="Upload mode">
+          <label class="upload-mode-option">
+            <input type="radio" name="upload_mode" value="image" checked> Images only
+          </label>
+          <label class="upload-mode-option">
+            <input type="radio" name="upload_mode" value="video"> Video only
+          </label>
+          <label class="upload-mode-option">
+            <input type="radio" name="upload_mode" value="both"> Images + video
+          </label>
+        </div>
+        <p class="upload-hint-text">Images: up to {{ max_images }} files, {{ max_image_mb }} MB combined (JPEG, PNG, WebP). Video: one file, max {{ max_video_mb }} MB (MP4, WebM, MOV, AVI, MKV).</p>
+      </div>
+
+      <div class="form-group" id="image-upload-block">
+        <label class="form-label">Site images</label>
+        <div class="upload-zone" id="upload-zone-images">
+          <input type="file" name="site_photos" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" multiple id="file-input-images">
+          <div class="upload-icon-area">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <div class="upload-text" id="upload-text-images">Drag &amp; drop images here, or click to browse</div>
+          <div class="upload-hint" id="upload-hint-images">Max {{ max_images }} files · {{ max_image_mb }} MB total</div>
+        </div>
+      </div>
+
+      <div class="form-group" id="video-upload-block" style="display:none;">
+        <label class="form-label">Site video</label>
+        <div class="upload-zone" id="upload-zone-video">
+          <input type="file" name="site_video" accept="video/*,.mp4,.webm,.mov,.avi,.mkv" id="file-input-video">
+          <div class="upload-icon-area">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+            </svg>
+          </div>
+          <div class="upload-text" id="upload-text-video">Choose one video file</div>
+          <div class="upload-hint">Max {{ max_video_mb }} MB</div>
+        </div>
+      </div>
+
+      <p id="inspection-client-error" class="form-inline-error" style="display:none;" role="alert"></p>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg" id="submit-btn">
+        <span id="btn-label">Run Inspection</span>
+        <span id="btn-loader" style="display:none;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite;">
+            <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
+            <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/>
+          </svg>
+          Processing…
+        </span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay">
+  <div class="loading-content">
+    <div class="loading-spinner"></div>
+    <h3 id="loading-title">Analyzing your upload</h3>
+    <p class="loading-status">Preparing to process…</p>
+    <div class="loading-steps">
+      <div class="loading-step active" id="step-upload"><span class="step-icon">✓</span> Files uploaded</div>
+      <div class="loading-step" id="step-yolo"><span class="step-icon">⟳</span> YOLO object detection</div>
+      <div class="loading-step" id="step-llm"><span class="step-icon">⟳</span> AI hazard analysis</div>
+      <div class="loading-step" id="step-report"><span class="step-icon">⟳</span> Generating outputs</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+  var MAX_IMAGES = {{ max_images|default(20) }};
+  var MAX_IMAGE_BYTES = {{ (max_image_mb|default(100)) }} * 1024 * 1024;
+  var MAX_VIDEO_BYTES = {{ (max_video_mb|default(250)) }} * 1024 * 1024;
+  var ALLOWED_IMAGE_EXT = ['.jpg', '.jpeg', '.png', '.webp'];
+  var ALLOWED_VIDEO_EXT = ['.mp4', '.webm', '.mov', '.avi', '.mkv'];
+
+  var form = document.getElementById('inspection-form');
+  var submitBtn = document.getElementById('submit-btn');
+  var btnLabel = document.getElementById('btn-label');
+  var btnLoader = document.getElementById('btn-loader');
+  var overlay = document.getElementById('loading-overlay');
+  var statusText = document.querySelector('.loading-status');
+  var loadingTitle = document.getElementById('loading-title');
+  var clientErr = document.getElementById('inspection-client-error');
+  var modeRadios = document.querySelectorAll('input[name="upload_mode"]');
+  var imageBlock = document.getElementById('image-upload-block');
+  var videoBlock = document.getElementById('video-upload-block');
+  var fileInputImages = document.getElementById('file-input-images');
+  var fileInputVideo = document.getElementById('file-input-video');
+  var uploadZoneImages = document.getElementById('upload-zone-images');
+  var uploadZoneVideo = document.getElementById('upload-zone-video');
+  var uploadTextImages = document.getElementById('upload-text-images');
+  var uploadTextVideo = document.getElementById('upload-text-video');
+
+  function getMode() {
+    var m = 'image';
+    modeRadios.forEach(function(r) { if (r.checked) m = r.value; });
+    return m;
+  }
+
+  function syncModeUI() {
+    var mode = getMode();
+    if (mode === 'image') {
+      imageBlock.style.display = '';
+      videoBlock.style.display = 'none';
+      fileInputImages.removeAttribute('data-optional');
+      fileInputVideo.value = '';
+    } else if (mode === 'video') {
+      imageBlock.style.display = 'none';
+      videoBlock.style.display = '';
+      fileInputImages.value = '';
+      uploadZoneImages.classList.remove('has-file');
+      uploadTextImages.innerHTML = 'Drag &amp; drop images here, or click to browse';
+    } else {
+      imageBlock.style.display = '';
+      videoBlock.style.display = '';
+    }
+  }
+
+  modeRadios.forEach(function(r) {
+    r.addEventListener('change', syncModeUI);
+  });
+  syncModeUI();
+
+  function extOf(name) {
+    var i = name.lastIndexOf('.');
+    return i >= 0 ? name.slice(i).toLowerCase() : '';
+  }
+
+  function showClientError(msg) {
+    clientErr.textContent = msg || '';
+    clientErr.style.display = msg ? 'block' : 'none';
+  }
+
+  function validateFiles() {
+    showClientError('');
+    var mode = getMode();
+    if (mode === 'image' || mode === 'both') {
+      var files = fileInputImages.files;
+      if (mode !== 'video' && files.length < 1) {
+        showClientError('Please select at least one image.');
+        return false;
+      }
+      if (files.length > MAX_IMAGES) {
+        showClientError('Too many images (max ' + MAX_IMAGES + ').');
+        return false;
+      }
+      var total = 0;
+      for (var i = 0; i < files.length; i++) {
+        var f = files[i];
+        var ex = extOf(f.name);
+        if (ALLOWED_IMAGE_EXT.indexOf(ex) < 0) {
+          showClientError('Unsupported image: ' + f.name);
+          return false;
+        }
+        total += f.size;
+      }
+      if (total > MAX_IMAGE_BYTES) {
+        showClientError('Total image size exceeds ' + (MAX_IMAGE_BYTES / (1024*1024)) + ' MB.');
+        return false;
+      }
+    }
+    if (mode === 'video' || mode === 'both') {
+      var vf = fileInputVideo.files[0];
+      if (!vf) {
+        showClientError('Please select a video file.');
+        return false;
+      }
+      var vex = extOf(vf.name);
+      if (ALLOWED_VIDEO_EXT.indexOf(vex) < 0) {
+        showClientError('Unsupported video format: ' + vf.name);
+        return false;
+      }
+      if (vf.size > MAX_VIDEO_BYTES) {
+        showClientError('Video exceeds ' + (MAX_VIDEO_BYTES / (1024*1024)) + ' MB.');
+        return false;
+      }
+    }
+    return true;
+  }
+
+  if (fileInputImages && uploadZoneImages) {
+    fileInputImages.addEventListener('change', function(e) {
+      var files = e.target.files;
+      if (files && files.length) {
+        uploadZoneImages.classList.add('has-file');
+        uploadTextImages.textContent = files.length + ' file(s) selected';
+      } else {
+        uploadZoneImages.classList.remove('has-file');
+        uploadTextImages.innerHTML = 'Drag &amp; drop images here, or click to browse';
+      }
+    });
+    ['dragenter','dragover'].forEach(function(ev) {
+      uploadZoneImages.addEventListener(ev, function(e) { e.preventDefault(); uploadZoneImages.style.borderColor = 'var(--accent)'; });
+    });
+    ['dragleave','drop'].forEach(function(ev) {
+      uploadZoneImages.addEventListener(ev, function(e) { e.preventDefault(); uploadZoneImages.style.borderColor = ''; });
+    });
+    uploadZoneImages.addEventListener('drop', function(e) {
+      e.preventDefault();
+      if (e.dataTransfer.files.length > 0) {
+        fileInputImages.files = e.dataTransfer.files;
+        fileInputImages.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+  }
+
+  if (fileInputVideo && uploadZoneVideo) {
+    fileInputVideo.addEventListener('change', function(e) {
+      var f = e.target.files[0];
+      if (f) {
+        uploadZoneVideo.classList.add('has-file');
+        uploadTextVideo.textContent = f.name;
+      } else {
+        uploadZoneVideo.classList.remove('has-file');
+        uploadTextVideo.textContent = 'Choose one video file';
+      }
+    });
+    ['dragenter','dragover'].forEach(function(ev) {
+      uploadZoneVideo.addEventListener(ev, function(e) { e.preventDefault(); uploadZoneVideo.style.borderColor = 'var(--accent)'; });
+    });
+    ['dragleave','drop'].forEach(function(ev) {
+      uploadZoneVideo.addEventListener(ev, function(e) { e.preventDefault(); uploadZoneVideo.style.borderColor = ''; });
+    });
+    uploadZoneVideo.addEventListener('drop', function(e) {
+      e.preventDefault();
+      if (e.dataTransfer.files.length > 0) {
+        fileInputVideo.files = e.dataTransfer.files;
+        fileInputVideo.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+  }
+
+  if (form && submitBtn) {
+    form.addEventListener('submit', function(e) {
+      if (!validateFiles()) {
+        e.preventDefault();
+        return;
+      }
+      if (!form.checkValidity()) {
+        return;
+      }
+      e.preventDefault();
+      var mode = getMode();
+      if (loadingTitle) {
+        loadingTitle.textContent = mode === 'video' ? 'Analyzing your video' : 'Analyzing your site media';
+      }
+
+      btnLabel.style.display = 'none';
+      btnLoader.style.display = 'inline-flex';
+      submitBtn.disabled = true;
+      if (overlay) { overlay.classList.add('show'); document.body.style.overflow = 'hidden'; }
+
+      var steps = [
+        { el: document.getElementById('step-yolo'), text: 'Running YOLO detection…', delay: 500 },
+        { el: document.getElementById('step-llm'), text: 'Analyzing with AI vision model…', delay: 2000 },
+        { el: document.getElementById('step-report'), text: 'Generating outputs…', delay: 3500 }
+      ];
+      if (mode === 'video') {
+        steps = [
+          { el: document.getElementById('step-yolo'), text: 'Sampling video frames…', delay: 500 },
+          { el: document.getElementById('step-llm'), text: 'Skipping VLM (video-only)…', delay: 2000 },
+          { el: document.getElementById('step-report'), text: 'Writing video summary…', delay: 3500 }
+        ];
+      }
+      steps.forEach(function(s) {
+        setTimeout(function() {
+          if (s.el) s.el.classList.add('active');
+          if (statusText) statusText.textContent = s.text;
+        }, s.delay);
+      });
+
+      setTimeout(function() { form.submit(); }, 150);
+    });
+  }
+})();
+</script>
+{% endblock %}
