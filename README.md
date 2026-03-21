@@ -88,4 +88,4 @@ Open `http://127.0.0.1:8000` (or the host/port in `PORT`).
 
 ## License
 
-This project is intended to align with the repository license on GitHub ([Apache-2.0](https://github.com/MahmoudOmar03/AHUSE/blob/main/LICENSE) where applicable). Add or adjust a `LICENSE` file in this repo if you maintain a separate copy.
+See [LICENSE](LICENSE) in this repository (Apache-2.0).
