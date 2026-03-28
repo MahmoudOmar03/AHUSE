@@ -10,93 +10,169 @@
     </div>
 
     <form method="post" action="{{ url_for('new_inspection') }}" enctype="multipart/form-data" id="inspection-form">
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" for="project_name">Project Name</label>
-          <input class="form-input" type="text" id="project_name" name="project_name" placeholder="e.g. Al Riyadh Tower" required>
+
+      <!-- ── Project details ─────────────────────────── -->
+      <div class="form-section-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+        Project Details
+      </div>
+
+      <div class="form-section-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="project_name">Project Name <span style="color: var(--status-danger);">*</span></label>
+            <input class="form-input" type="text" id="project_name" name="project_name" placeholder="e.g. Al Riyadh Tower" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="site_location">Site Location <span style="color: var(--status-danger);">*</span></label>
+            <input class="form-input" type="text" id="site_location" name="site_location" placeholder="e.g. Riyadh, KSA" required>
+          </div>
         </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="inspection_by">Inspection By <span style="color: var(--status-danger);">*</span></label>
+            <input class="form-input" type="text" id="inspection_by" name="inspection_by" placeholder="Inspector name" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="verified_by">Verified By <span style="color: var(--status-danger);">*</span></label>
+            <input class="form-input" type="text" id="verified_by" name="verified_by" placeholder="Verifier name" required>
+          </div>
+        </div>
+
         <div class="form-group">
-          <label class="form-label" for="site_location">Site Location</label>
-          <input class="form-input" type="text" id="site_location" name="site_location" placeholder="e.g. Riyadh, KSA" required>
+          <label class="form-label" for="notes">Notes <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
+          <textarea class="form-textarea" id="notes" name="notes" rows="3" placeholder="Any additional observations or context..."></textarea>
         </div>
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" for="inspection_by">Inspection By</label>
-          <input class="form-input" type="text" id="inspection_by" name="inspection_by" placeholder="Inspector name" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="verified_by">Verified By</label>
-          <input class="form-input" type="text" id="verified_by" name="verified_by" placeholder="Verifier name" required>
-        </div>
+      <!-- ── Upload mode ─────────────────────────────── -->
+      <div class="form-section-divider"></div>
+      <div class="form-section-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+        Media Upload
       </div>
 
-      <div class="form-group">
-        <label class="form-label" for="notes">Notes <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
-        <textarea class="form-textarea" id="notes" name="notes" rows="3" placeholder="Any additional observations or context..."></textarea>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Upload mode</label>
-        <div class="upload-mode-row" role="radiogroup" aria-label="Upload mode">
-          <label class="upload-mode-option">
+      <div class="form-section-body">
+        <div class="form-group form-group-modes">
+          <label class="form-label">Upload Mode</label>
+          <div class="upload-mode-row" role="radiogroup" aria-label="Upload mode">
+          <label class="upload-mode-option active" id="mode-opt-image">
+            <span class="upload-mode-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+            </span>
             <input type="radio" name="upload_mode" value="image" checked> Images only
           </label>
-          <label class="upload-mode-option">
+          <label class="upload-mode-option" id="mode-opt-video">
+            <span class="upload-mode-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+            </span>
             <input type="radio" name="upload_mode" value="video"> Video only
           </label>
-          <label class="upload-mode-option">
-            <input type="radio" name="upload_mode" value="both"> Images + video
+          <label class="upload-mode-option" id="mode-opt-both">
+            <span class="upload-mode-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="8" y1="2" x2="8" y2="22"/><line x1="16" y1="2" x2="16" y2="22"/></svg>
+            </span>
+            <input type="radio" name="upload_mode" value="both"> Images + Video
           </label>
         </div>
         <p class="upload-hint-text">Images: up to {{ max_images }} files, {{ max_image_mb }} MB combined (JPEG, PNG, WebP). Video: one file, max {{ max_video_mb }} MB (MP4, WebM, MOV, AVI, MKV).</p>
       </div>
 
+      <!-- ── Image upload ────────────────────────────── -->
       <div class="form-group" id="image-upload-block">
-        <label class="form-label">Site images</label>
+        <div class="upload-section-header">
+          <label class="form-label">Site Images</label>
+          <div class="upload-actions">
+            <button type="button" class="upload-action-btn active" id="btn-upload-images" onclick="document.getElementById('file-input-images').click()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload Files
+            </button>
+            <button type="button" class="upload-action-btn" id="btn-camera-images" onclick="CAMERA.open('image')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              Use Camera
+            </button>
+          </div>
+        </div>
         <div class="upload-zone" id="upload-zone-images">
           <input type="file" name="site_photos" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" multiple id="file-input-images">
+          <!-- Hidden camera fallback input for mobile -->
+          <input type="file" accept="image/*" capture="environment" id="camera-fallback-image" style="display:none;">
           <div class="upload-icon-area">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="17 8 12 3 7 8"/>
               <line x1="12" y1="3" x2="12" y2="15"/>
             </svg>
           </div>
-          <div class="upload-text" id="upload-text-images">Drag &amp; drop images here, or click to browse</div>
-          <div class="upload-hint" id="upload-hint-images">Max {{ max_images }} files · {{ max_image_mb }} MB total</div>
+          <div class="upload-text" id="upload-text-images">Drag &amp; drop images here, or <strong>browse</strong></div>
+          <div class="upload-hint" id="upload-hint-images">Max {{ max_images }} files · {{ max_image_mb }} MB total · JPEG, PNG, WebP</div>
         </div>
+        <div class="file-preview-grid" id="preview-images"></div>
       </div>
 
+      <!-- ── Video upload ────────────────────────────── -->
       <div class="form-group" id="video-upload-block" style="display:none;">
-        <label class="form-label">Site video</label>
+        <div class="upload-section-header">
+          <label class="form-label">Site Video</label>
+          <div class="upload-actions">
+            <button type="button" class="upload-action-btn active" id="btn-upload-video" onclick="document.getElementById('file-input-video').click()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload File
+            </button>
+            <button type="button" class="upload-action-btn" id="btn-camera-video" onclick="CAMERA.open('video')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+              Record Video
+            </button>
+          </div>
+        </div>
         <div class="upload-zone" id="upload-zone-video">
           <input type="file" name="site_video" accept="video/*,.mp4,.webm,.mov,.avi,.mkv" id="file-input-video">
+          <!-- Hidden camera fallback input for mobile -->
+          <input type="file" accept="video/*" capture="environment" id="camera-fallback-video" style="display:none;">
           <div class="upload-icon-area">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
             </svg>
           </div>
-          <div class="upload-text" id="upload-text-video">Choose one video file</div>
-          <div class="upload-hint">Max {{ max_video_mb }} MB</div>
+          <div class="upload-text" id="upload-text-video">Choose one video file, or <strong>browse</strong></div>
+          <div class="upload-hint">Max {{ max_video_mb }} MB · MP4, WebM, MOV, AVI, MKV</div>
         </div>
+        <div class="file-preview-grid" id="preview-video"></div>
       </div>
+
+      </div> <!-- end .form-section-body -->
 
       <p id="inspection-client-error" class="form-inline-error" style="display:none;" role="alert"></p>
 
-      <button type="submit" class="btn btn-primary btn-block btn-lg" id="submit-btn">
-        <span id="btn-label">Run Inspection</span>
-        <span id="btn-loader" style="display:none;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite;">
-            <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
-            <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/>
-          </svg>
-          Processing…
-        </span>
-      </button>
+      <div class="form-submit-wrapper">
+        <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
+          <span id="btn-label">Run AI Inspection</span>
+          <span id="btn-loader" style="display:none;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 1s linear infinite;">
+              <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+            </svg>
+            Processing…
+          </span>
+        </button>
+      </div>
     </form>
   </div>
+</div>
+
+<!-- Camera Modal -->
+<div class="camera-modal" id="camera-modal" role="dialog" aria-label="Camera capture">
+  <div class="camera-viewfinder" id="camera-viewfinder">
+    <video id="camera-video" autoplay playsinline muted></video>
+    <canvas id="camera-canvas"></canvas>
+  </div>
+  <div class="camera-controls" id="camera-controls">
+    <button type="button" class="camera-btn camera-btn--secondary" id="camera-cancel" aria-label="Cancel">Cancel</button>
+    <button type="button" class="camera-btn camera-btn--capture" id="camera-capture" aria-label="Capture"></button>
+    <button type="button" class="camera-btn camera-btn--secondary" id="camera-retake" style="display:none;" aria-label="Retake">Retake</button>
+    <button type="button" class="camera-btn camera-btn--confirm" id="camera-confirm" style="display:none;" aria-label="Use this">Use This</button>
+  </div>
+  <div class="camera-status" id="camera-status"></div>
 </div>
 
 <!-- Loading Overlay -->
@@ -118,12 +194,14 @@
 {% block scripts %}
 <script>
 (function() {
+  /* ── Constants ──────────────────────────────────────── */
   var MAX_IMAGES = {{ max_images|default(20) }};
   var MAX_IMAGE_BYTES = {{ (max_image_mb|default(100)) }} * 1024 * 1024;
   var MAX_VIDEO_BYTES = {{ (max_video_mb|default(250)) }} * 1024 * 1024;
   var ALLOWED_IMAGE_EXT = ['.jpg', '.jpeg', '.png', '.webp'];
   var ALLOWED_VIDEO_EXT = ['.mp4', '.webm', '.mov', '.avi', '.mkv'];
 
+  /* ── DOM refs ───────────────────────────────────────── */
   var form = document.getElementById('inspection-form');
   var submitBtn = document.getElementById('submit-btn');
   var btnLabel = document.getElementById('btn-label');
@@ -133,6 +211,7 @@
   var loadingTitle = document.getElementById('loading-title');
   var clientErr = document.getElementById('inspection-client-error');
   var modeRadios = document.querySelectorAll('input[name="upload_mode"]');
+  var modeOptions = document.querySelectorAll('.upload-mode-option');
   var imageBlock = document.getElementById('image-upload-block');
   var videoBlock = document.getElementById('video-upload-block');
   var fileInputImages = document.getElementById('file-input-images');
@@ -141,36 +220,19 @@
   var uploadZoneVideo = document.getElementById('upload-zone-video');
   var uploadTextImages = document.getElementById('upload-text-images');
   var uploadTextVideo = document.getElementById('upload-text-video');
+  var previewImages = document.getElementById('preview-images');
+  var previewVideo = document.getElementById('preview-video');
 
+  /* ── Staged files (DataTransfer for programmatic add/remove) ── */
+  var stagedImagesDT = new DataTransfer();
+  var stagedVideoDT = new DataTransfer();
+
+  /* ── Helpers ────────────────────────────────────────── */
   function getMode() {
     var m = 'image';
     modeRadios.forEach(function(r) { if (r.checked) m = r.value; });
     return m;
   }
-
-  function syncModeUI() {
-    var mode = getMode();
-    if (mode === 'image') {
-      imageBlock.style.display = '';
-      videoBlock.style.display = 'none';
-      fileInputImages.removeAttribute('data-optional');
-      fileInputVideo.value = '';
-    } else if (mode === 'video') {
-      imageBlock.style.display = 'none';
-      videoBlock.style.display = '';
-      fileInputImages.value = '';
-      uploadZoneImages.classList.remove('has-file');
-      uploadTextImages.innerHTML = 'Drag &amp; drop images here, or click to browse';
-    } else {
-      imageBlock.style.display = '';
-      videoBlock.style.display = '';
-    }
-  }
-
-  modeRadios.forEach(function(r) {
-    r.addEventListener('change', syncModeUI);
-  });
-  syncModeUI();
 
   function extOf(name) {
     var i = name.lastIndexOf('.');
@@ -182,12 +244,243 @@
     clientErr.style.display = msg ? 'block' : 'none';
   }
 
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+
+  /* ── Upload mode toggle ─────────────────────────────── */
+  function syncModeUI() {
+    var mode = getMode();
+    // Update pill active states
+    modeOptions.forEach(function(opt) {
+      var radio = opt.querySelector('input[type="radio"]');
+      if (radio && radio.checked) {
+        opt.classList.add('active');
+      } else {
+        opt.classList.remove('active');
+      }
+    });
+    if (mode === 'image') {
+      imageBlock.style.display = '';
+      videoBlock.style.display = 'none';
+      stagedVideoDT = new DataTransfer();
+      fileInputVideo.files = stagedVideoDT.files;
+      renderVideoPreview();
+    } else if (mode === 'video') {
+      imageBlock.style.display = 'none';
+      videoBlock.style.display = '';
+      stagedImagesDT = new DataTransfer();
+      fileInputImages.files = stagedImagesDT.files;
+      renderImagePreviews();
+      uploadZoneImages.classList.remove('has-file');
+      uploadTextImages.innerHTML = 'Drag &amp; drop images here, or <strong>browse</strong>';
+    } else {
+      imageBlock.style.display = '';
+      videoBlock.style.display = '';
+    }
+  }
+
+  modeRadios.forEach(function(r) {
+    r.addEventListener('change', syncModeUI);
+  });
+  syncModeUI();
+
+  /* ── File preview rendering ─────────────────────────── */
+  function renderImagePreviews() {
+    previewImages.innerHTML = '';
+    var files = stagedImagesDT.files;
+    if (files.length === 0) {
+      uploadZoneImages.classList.remove('has-file');
+      uploadTextImages.innerHTML = 'Drag &amp; drop images here, or <strong>browse</strong>';
+      return;
+    }
+    uploadZoneImages.classList.add('has-file');
+    uploadTextImages.textContent = files.length + ' file(s) selected';
+
+    for (var i = 0; i < files.length; i++) {
+      (function(idx) {
+        var file = files[idx];
+        var card = document.createElement('div');
+        card.className = 'file-preview-card';
+
+        var img = document.createElement('img');
+        img.className = 'file-preview-thumb';
+        img.alt = file.name;
+        var reader = new FileReader();
+        reader.onload = function(e) { img.src = e.target.result; };
+        reader.readAsDataURL(file);
+        card.appendChild(img);
+
+        var info = document.createElement('div');
+        info.className = 'file-preview-info';
+        var nameEl = document.createElement('span');
+        nameEl.className = 'file-preview-name';
+        nameEl.textContent = file.name;
+        nameEl.title = file.name + ' (' + formatSize(file.size) + ')';
+        info.appendChild(nameEl);
+        var badge = document.createElement('span');
+        badge.className = 'file-preview-badge file-preview-badge--img';
+        badge.textContent = extOf(file.name).replace('.', '').toUpperCase();
+        info.appendChild(badge);
+        card.appendChild(info);
+
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'file-preview-remove';
+        removeBtn.innerHTML = '✕';
+        removeBtn.title = 'Remove';
+        removeBtn.setAttribute('aria-label', 'Remove ' + file.name);
+        removeBtn.addEventListener('click', function() {
+          removeImageAtIndex(idx);
+        });
+        card.appendChild(removeBtn);
+
+        previewImages.appendChild(card);
+      })(i);
+    }
+  }
+
+  function renderVideoPreview() {
+    previewVideo.innerHTML = '';
+    var files = stagedVideoDT.files;
+    if (files.length === 0) {
+      uploadZoneVideo.classList.remove('has-file');
+      uploadTextVideo.innerHTML = 'Choose one video file, or <strong>browse</strong>';
+      return;
+    }
+    uploadZoneVideo.classList.add('has-file');
+    uploadTextVideo.textContent = files[0].name;
+
+    var file = files[0];
+    var card = document.createElement('div');
+    card.className = 'file-preview-card';
+
+    var thumb = document.createElement('div');
+    thumb.className = 'file-preview-video-thumb';
+    thumb.innerHTML = '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+    card.appendChild(thumb);
+
+    var info = document.createElement('div');
+    info.className = 'file-preview-info';
+    var nameEl = document.createElement('span');
+    nameEl.className = 'file-preview-name';
+    nameEl.textContent = file.name;
+    nameEl.title = file.name + ' (' + formatSize(file.size) + ')';
+    info.appendChild(nameEl);
+    var badge = document.createElement('span');
+    badge.className = 'file-preview-badge file-preview-badge--vid';
+    badge.textContent = extOf(file.name).replace('.', '').toUpperCase();
+    info.appendChild(badge);
+    card.appendChild(info);
+
+    var removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'file-preview-remove';
+    removeBtn.innerHTML = '✕';
+    removeBtn.title = 'Remove';
+    removeBtn.setAttribute('aria-label', 'Remove ' + file.name);
+    removeBtn.addEventListener('click', function() {
+      stagedVideoDT = new DataTransfer();
+      fileInputVideo.files = stagedVideoDT.files;
+      renderVideoPreview();
+    });
+    card.appendChild(removeBtn);
+
+    previewVideo.appendChild(card);
+  }
+
+  function removeImageAtIndex(idx) {
+    var newDT = new DataTransfer();
+    for (var i = 0; i < stagedImagesDT.files.length; i++) {
+      if (i !== idx) newDT.items.add(stagedImagesDT.files[i]);
+    }
+    stagedImagesDT = newDT;
+    fileInputImages.files = stagedImagesDT.files;
+    renderImagePreviews();
+  }
+
+  function addFilesToImages(fileList) {
+    for (var i = 0; i < fileList.length; i++) {
+      if (stagedImagesDT.files.length >= MAX_IMAGES) {
+        showClientError('Too many images (max ' + MAX_IMAGES + '). Extra files skipped.');
+        break;
+      }
+      stagedImagesDT.items.add(fileList[i]);
+    }
+    fileInputImages.files = stagedImagesDT.files;
+    renderImagePreviews();
+  }
+
+  /* ── Image file input ───────────────────────────────── */
+  if (fileInputImages && uploadZoneImages) {
+    fileInputImages.addEventListener('change', function(e) {
+      if (e.target.files && e.target.files.length) {
+        addFilesToImages(e.target.files);
+      }
+    });
+    ['dragenter', 'dragover'].forEach(function(ev) {
+      uploadZoneImages.addEventListener(ev, function(e) {
+        e.preventDefault();
+        uploadZoneImages.classList.add('drag-over');
+      });
+    });
+    ['dragleave', 'drop'].forEach(function(ev) {
+      uploadZoneImages.addEventListener(ev, function(e) {
+        e.preventDefault();
+        uploadZoneImages.classList.remove('drag-over');
+      });
+    });
+    uploadZoneImages.addEventListener('drop', function(e) {
+      e.preventDefault();
+      if (e.dataTransfer.files.length > 0) {
+        addFilesToImages(e.dataTransfer.files);
+      }
+    });
+  }
+
+  /* ── Video file input ───────────────────────────────── */
+  if (fileInputVideo && uploadZoneVideo) {
+    fileInputVideo.addEventListener('change', function(e) {
+      var f = e.target.files[0];
+      if (f) {
+        stagedVideoDT = new DataTransfer();
+        stagedVideoDT.items.add(f);
+        fileInputVideo.files = stagedVideoDT.files;
+        renderVideoPreview();
+      }
+    });
+    ['dragenter', 'dragover'].forEach(function(ev) {
+      uploadZoneVideo.addEventListener(ev, function(e) {
+        e.preventDefault();
+        uploadZoneVideo.classList.add('drag-over');
+      });
+    });
+    ['dragleave', 'drop'].forEach(function(ev) {
+      uploadZoneVideo.addEventListener(ev, function(e) {
+        e.preventDefault();
+        uploadZoneVideo.classList.remove('drag-over');
+      });
+    });
+    uploadZoneVideo.addEventListener('drop', function(e) {
+      e.preventDefault();
+      if (e.dataTransfer.files.length > 0) {
+        stagedVideoDT = new DataTransfer();
+        stagedVideoDT.items.add(e.dataTransfer.files[0]);
+        fileInputVideo.files = stagedVideoDT.files;
+        renderVideoPreview();
+      }
+    });
+  }
+
+  /* ── Validation ─────────────────────────────────────── */
   function validateFiles() {
     showClientError('');
     var mode = getMode();
     if (mode === 'image' || mode === 'both') {
       var files = fileInputImages.files;
-      if (mode !== 'video' && files.length < 1) {
+      if (files.length < 1) {
         showClientError('Please select at least one image.');
         return false;
       }
@@ -206,7 +499,7 @@
         total += f.size;
       }
       if (total > MAX_IMAGE_BYTES) {
-        showClientError('Total image size exceeds ' + (MAX_IMAGE_BYTES / (1024*1024)) + ' MB.');
+        showClientError('Total image size exceeds ' + (MAX_IMAGE_BYTES / (1024 * 1024)) + ' MB.');
         return false;
       }
     }
@@ -222,65 +515,14 @@
         return false;
       }
       if (vf.size > MAX_VIDEO_BYTES) {
-        showClientError('Video exceeds ' + (MAX_VIDEO_BYTES / (1024*1024)) + ' MB.');
+        showClientError('Video exceeds ' + (MAX_VIDEO_BYTES / (1024 * 1024)) + ' MB.');
         return false;
       }
     }
     return true;
   }
 
-  if (fileInputImages && uploadZoneImages) {
-    fileInputImages.addEventListener('change', function(e) {
-      var files = e.target.files;
-      if (files && files.length) {
-        uploadZoneImages.classList.add('has-file');
-        uploadTextImages.textContent = files.length + ' file(s) selected';
-      } else {
-        uploadZoneImages.classList.remove('has-file');
-        uploadTextImages.innerHTML = 'Drag &amp; drop images here, or click to browse';
-      }
-    });
-    ['dragenter','dragover'].forEach(function(ev) {
-      uploadZoneImages.addEventListener(ev, function(e) { e.preventDefault(); uploadZoneImages.style.borderColor = 'var(--accent)'; });
-    });
-    ['dragleave','drop'].forEach(function(ev) {
-      uploadZoneImages.addEventListener(ev, function(e) { e.preventDefault(); uploadZoneImages.style.borderColor = ''; });
-    });
-    uploadZoneImages.addEventListener('drop', function(e) {
-      e.preventDefault();
-      if (e.dataTransfer.files.length > 0) {
-        fileInputImages.files = e.dataTransfer.files;
-        fileInputImages.dispatchEvent(new Event('change', { bubbles: true }));
-      }
-    });
-  }
-
-  if (fileInputVideo && uploadZoneVideo) {
-    fileInputVideo.addEventListener('change', function(e) {
-      var f = e.target.files[0];
-      if (f) {
-        uploadZoneVideo.classList.add('has-file');
-        uploadTextVideo.textContent = f.name;
-      } else {
-        uploadZoneVideo.classList.remove('has-file');
-        uploadTextVideo.textContent = 'Choose one video file';
-      }
-    });
-    ['dragenter','dragover'].forEach(function(ev) {
-      uploadZoneVideo.addEventListener(ev, function(e) { e.preventDefault(); uploadZoneVideo.style.borderColor = 'var(--accent)'; });
-    });
-    ['dragleave','drop'].forEach(function(ev) {
-      uploadZoneVideo.addEventListener(ev, function(e) { e.preventDefault(); uploadZoneVideo.style.borderColor = ''; });
-    });
-    uploadZoneVideo.addEventListener('drop', function(e) {
-      e.preventDefault();
-      if (e.dataTransfer.files.length > 0) {
-        fileInputVideo.files = e.dataTransfer.files;
-        fileInputVideo.dispatchEvent(new Event('change', { bubbles: true }));
-      }
-    });
-  }
-
+  /* ── Form submission ────────────────────────────────── */
   if (form && submitBtn) {
     form.addEventListener('submit', function(e) {
       if (!validateFiles()) {
@@ -323,6 +565,247 @@
       setTimeout(function() { form.submit(); }, 150);
     });
   }
+
+  /* ================================================================
+     CAMERA CAPTURE
+     ================================================================ */
+  var CAMERA = window.CAMERA = (function() {
+    var modal = document.getElementById('camera-modal');
+    var videoEl = document.getElementById('camera-video');
+    var canvasEl = document.getElementById('camera-canvas');
+    var captureBtn = document.getElementById('camera-capture');
+    var cancelBtn = document.getElementById('camera-cancel');
+    var retakeBtn = document.getElementById('camera-retake');
+    var confirmBtn = document.getElementById('camera-confirm');
+    var statusEl = document.getElementById('camera-status');
+    var cameraFallbackImage = document.getElementById('camera-fallback-image');
+    var cameraFallbackVideo = document.getElementById('camera-fallback-video');
+
+    var stream = null;
+    var capturedBlob = null;
+    var captureMode = 'image'; // 'image' or 'video'
+    var mediaRecorder = null;
+    var recordedChunks = [];
+    var isRecording = false;
+
+    var hasGetUserMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+
+    /* ── Fallback camera inputs ─────────────── */
+    if (cameraFallbackImage) {
+      cameraFallbackImage.addEventListener('change', function(e) {
+        if (e.target.files && e.target.files.length) {
+          addFilesToImages(e.target.files);
+        }
+        e.target.value = '';
+      });
+    }
+    if (cameraFallbackVideo) {
+      cameraFallbackVideo.addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+          stagedVideoDT = new DataTransfer();
+          stagedVideoDT.items.add(e.target.files[0]);
+          fileInputVideo.files = stagedVideoDT.files;
+          renderVideoPreview();
+        }
+        e.target.value = '';
+      });
+    }
+
+    function open(mode) {
+      captureMode = mode || 'image';
+
+      // On mobile / no getUserMedia — use native camera input
+      if (!hasGetUserMedia) {
+        if (captureMode === 'video') {
+          cameraFallbackVideo.click();
+        } else {
+          cameraFallbackImage.click();
+        }
+        return;
+      }
+
+      // Open modal with camera stream
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      statusEl.textContent = 'Starting camera…';
+      capturedBlob = null;
+      resetUIToLive();
+
+      var constraints = { video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } };
+      if (captureMode === 'video') {
+        constraints.audio = true;
+      }
+
+      navigator.mediaDevices.getUserMedia(constraints)
+        .then(function(s) {
+          stream = s;
+          videoEl.srcObject = stream;
+          statusEl.textContent = captureMode === 'video' ? 'Tap to start recording' : 'Tap to capture photo';
+        })
+        .catch(function(err) {
+          console.error('Camera error:', err);
+          var msg = 'Camera access denied.';
+          if (err.name === 'NotAllowedError') {
+            msg = 'Camera permission denied. Please allow camera access in your browser settings.';
+          } else if (err.name === 'NotFoundError') {
+            msg = 'No camera found on this device.';
+          } else if (err.name === 'NotReadableError') {
+            msg = 'Camera is in use by another application.';
+          }
+          statusEl.innerHTML = '<span style="color:var(--status-danger);">' + msg + '</span>';
+          // Fall back to file input
+          setTimeout(function() {
+            close();
+            if (captureMode === 'video') {
+              cameraFallbackVideo.click();
+            } else {
+              cameraFallbackImage.click();
+            }
+          }, 2000);
+        });
+    }
+
+    function close() {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+      stopStream();
+      stopRecording();
+      capturedBlob = null;
+    }
+
+    function stopStream() {
+      if (stream) {
+        stream.getTracks().forEach(function(t) { t.stop(); });
+        stream = null;
+      }
+      videoEl.srcObject = null;
+    }
+
+    function resetUIToLive() {
+      videoEl.classList.remove('hide');
+      canvasEl.classList.remove('show');
+      captureBtn.style.display = '';
+      captureBtn.classList.remove('recording');
+      retakeBtn.style.display = 'none';
+      confirmBtn.style.display = 'none';
+      isRecording = false;
+    }
+
+    function capturePhoto() {
+      canvasEl.width = videoEl.videoWidth;
+      canvasEl.height = videoEl.videoHeight;
+      var ctx = canvasEl.getContext('2d');
+      ctx.drawImage(videoEl, 0, 0);
+
+      videoEl.classList.add('hide');
+      canvasEl.classList.add('show');
+
+      canvasEl.toBlob(function(blob) {
+        capturedBlob = blob;
+        captureBtn.style.display = 'none';
+        retakeBtn.style.display = '';
+        confirmBtn.style.display = '';
+        statusEl.textContent = 'Review your photo';
+      }, 'image/jpeg', 0.92);
+    }
+
+    function startRecording() {
+      recordedChunks = [];
+      var options = { mimeType: 'video/webm;codecs=vp9' };
+      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options = { mimeType: 'video/webm' };
+        if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+          options = {};
+        }
+      }
+      try {
+        mediaRecorder = new MediaRecorder(stream, options);
+      } catch(e) {
+        statusEl.innerHTML = '<span style="color:var(--status-danger);">Video recording not supported in this browser.</span>';
+        return;
+      }
+      mediaRecorder.ondataavailable = function(e) {
+        if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+      };
+      mediaRecorder.onstop = function() {
+        capturedBlob = new Blob(recordedChunks, { type: 'video/webm' });
+        recordedChunks = [];
+        captureBtn.style.display = 'none';
+        captureBtn.classList.remove('recording');
+        retakeBtn.style.display = '';
+        confirmBtn.style.display = '';
+        statusEl.textContent = 'Recording complete. Review or retake.';
+      };
+      mediaRecorder.start(100);
+      isRecording = true;
+      captureBtn.classList.add('recording');
+      statusEl.textContent = 'Recording… tap to stop';
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+      isRecording = false;
+    }
+
+    function confirmCapture() {
+      if (!capturedBlob) return;
+
+      if (captureMode === 'image') {
+        var fileName = 'camera_photo_' + Date.now() + '.jpg';
+        var file = new File([capturedBlob], fileName, { type: 'image/jpeg' });
+        addFilesToImages([file]);
+      } else {
+        var fileName = 'camera_video_' + Date.now() + '.webm';
+        var file = new File([capturedBlob], fileName, { type: 'video/webm' });
+        stagedVideoDT = new DataTransfer();
+        stagedVideoDT.items.add(file);
+        fileInputVideo.files = stagedVideoDT.files;
+        renderVideoPreview();
+      }
+
+      close();
+    }
+
+    function retake() {
+      capturedBlob = null;
+      recordedChunks = [];
+      resetUIToLive();
+      statusEl.textContent = captureMode === 'video' ? 'Tap to start recording' : 'Tap to capture photo';
+      // Re-attach stream if still active
+      if (stream) {
+        videoEl.srcObject = stream;
+      }
+    }
+
+    /* ── Event listeners ───────────────────── */
+    captureBtn.addEventListener('click', function() {
+      if (captureMode === 'video') {
+        if (isRecording) {
+          stopRecording();
+        } else {
+          startRecording();
+        }
+      } else {
+        capturePhoto();
+      }
+    });
+
+    cancelBtn.addEventListener('click', close);
+    retakeBtn.addEventListener('click', retake);
+    confirmBtn.addEventListener('click', confirmCapture);
+
+    // Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && modal.classList.contains('open')) {
+        close();
+      }
+    });
+
+    return { open: open, close: close };
+  })();
+
 })();
 </script>
 {% endblock %}
