@@ -680,6 +680,11 @@ def register_routes(app: Flask, oauth: OAuth) -> None:
             risk_filter=risk_filter,
         )
 
+    # ── BencMarks ─────────────────────────────────────────────────
+    @app.route("/bencmarks")
+    def bencmarks():
+        return render_template("bencmarks.html")
+
     # ── Contact ───────────────────────────────────────────────────
     @app.route("/contact", methods=["GET", "POST"])
     def contact():

@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}?v=2" type="image/png">
     {% block head %}{% endblock %}
   </head>
   <body>
@@ -16,7 +17,16 @@
     <header class="navbar" id="navbar">
       <div class="navbar-inner">
         <a href="{{ url_for('index') }}" class="navbar-brand">
-          <span class="brand-icon">AU</span>
+          <span class="brand-logo-wrap">
+            <img
+              src="{{ url_for('static', filename='images/logo.png') }}?v=2"
+              alt=""
+              class="brand-logo"
+              width="1536"
+              height="1024"
+              decoding="async"
+            >
+          </span>
           <div class="brand-label">
             <strong>AUHSE</strong>
             <small>Autonomous HSE Intelligence</small>
@@ -30,6 +40,7 @@
         <nav class="navbar-nav" id="navbar-nav">
           <a href="{{ url_for('index') }}#features" class="nav-link">Features</a>
           <a href="{{ url_for('index') }}#how-it-works" class="nav-link">How It Works</a>
+          <a href="{{ url_for('bencmarks') }}" class="nav-link">BencMarks</a>
           <a href="{{ url_for('contact') }}" class="nav-link">Contact</a>
 
           {% if current_user.is_authenticated %}
@@ -91,7 +102,16 @@
       <div class="footer-grid">
         <div class="footer-col footer-brand-col">
           <div class="footer-brand">
-            <span class="brand-icon brand-icon-sm">AU</span>
+            <span class="brand-logo-wrap brand-logo-wrap--footer">
+              <img
+                src="{{ url_for('static', filename='images/logo.png') }}?v=2"
+                alt=""
+                class="brand-logo brand-logo--footer"
+                width="1536"
+                height="1024"
+                decoding="async"
+              >
+            </span>
             <strong>AUHSE</strong>
           </div>
           <p>AI-assisted construction safety inspections for modern HSE teams. Built for GCC compliance workflows.</p>
@@ -101,6 +121,7 @@
           <ul>
             <li><a href="{{ url_for('index') }}#features">Features</a></li>
             <li><a href="{{ url_for('index') }}#how-it-works">How It Works</a></li>
+            <li><a href="{{ url_for('bencmarks') }}">BencMarks</a></li>
             {% if current_user.is_authenticated %}
             <li><a href="{{ url_for('new_inspection') }}">New Inspection</a></li>
             {% endif %}

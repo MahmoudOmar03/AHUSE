@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+{% block title %}BencMarks — AUHSE{% endblock %}
+{% block meta_description %}AUHSE vs InspectionReport.app, FindRisk, Inspectly360, and HSE.AI — BERTScore, ROUGE-L, and report latency.{% endblock %}
+
+{% block head %}
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+{% endblock %}
+
+{% block content %}
+<div class="benchmark-page">
+<div class="page-header benchmark-page-header-wrap">
+  <div class="page-header-inner benchmark-page-header">
+    <div class="benchmark-hero-text">
+      <h1>BencMarks</h1>
+      <p class="benchmark-lead benchmark-lead--primary">
+        Comparison on a curated set of construction HSE inspection reports.
+      </p>
+      <p class="benchmark-lead benchmark-lead--meta">
+        <span class="benchmark-mono">n = 200</span> image-conditioned drafts. Same prompts and post-processing across all products.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="benchmark-legend-bar container">
+  <div class="benchmark-legend-item">
+    <span class="benchmark-swatch benchmark-swatch--auhse"></span>
+    <span>AUHSE</span>
+  </div>
+  <div class="benchmark-legend-item">
+    <span class="benchmark-swatch benchmark-swatch--ir"></span>
+    <span>InspectionReport.app</span>
+  </div>
+  <div class="benchmark-legend-item">
+    <span class="benchmark-swatch benchmark-swatch--findrisk"></span>
+    <span>FindRisk</span>
+  </div>
+  <div class="benchmark-legend-item">
+    <span class="benchmark-swatch benchmark-swatch--inspectly"></span>
+    <span>Inspectly360</span>
+  </div>
+  <div class="benchmark-legend-item">
+    <span class="benchmark-swatch benchmark-swatch--hseai"></span>
+    <span>HSE.AI</span>
+  </div>
+</div>
+
+<div class="benchmark-grid container">
+  <article class="benchmark-card benchmark-card--auhse-win">
+    <header class="benchmark-card-header">
+      <h2 class="benchmark-card-title">YOLO v8 mAP@50</h2>
+      <span class="benchmark-pill benchmark-pill--us">AUHSE ahead</span>
+    </header>
+    <p class="benchmark-card-desc">Object detection accuracy at IoU 0.50 for site-safety classes. Higher is better.</p>
+    <div class="benchmark-chart-wrap benchmark-chart-wrap--horizontal benchmark-chart-wrap--multi">
+      <canvas id="chartYolo" aria-label="YOLO mAP at 50 comparison"></canvas>
+    </div>
+  </article>
+
+  <article class="benchmark-card benchmark-card--auhse-win">
+    <header class="benchmark-card-header">
+      <h2 class="benchmark-card-title">BERTScore F1</h2>
+      <span class="benchmark-pill benchmark-pill--us">AUHSE ahead</span>
+    </header>
+    <p class="benchmark-card-desc">Semantic match to expert-written references (embedding-based). Higher is better.</p>
+    <div class="benchmark-chart-wrap benchmark-chart-wrap--horizontal benchmark-chart-wrap--multi">
+      <canvas id="chartBertscore" aria-label="BERTScore F1 comparison"></canvas>
+    </div>
+  </article>
+
+  <article class="benchmark-card benchmark-card--auhse-win">
+    <header class="benchmark-card-header">
+      <h2 class="benchmark-card-title">ROUGE-L</h2>
+      <span class="benchmark-pill benchmark-pill--us">AUHSE ahead</span>
+    </header>
+    <p class="benchmark-card-desc">Overlap with expert hazard narratives (longest common subsequence). Higher is better.</p>
+    <div class="benchmark-chart-wrap benchmark-chart-wrap--horizontal benchmark-chart-wrap--multi">
+      <canvas id="chartRouge" aria-label="ROUGE-L comparison"></canvas>
+    </div>
+  </article>
+
+  <article class="benchmark-card benchmark-card--hse-win">
+    <header class="benchmark-card-header">
+      <h2 class="benchmark-card-title">Time to first draft</h2>
+      <span class="benchmark-pill benchmark-pill--hse">HSE.AI ahead</span>
+    </header>
+    <p class="benchmark-card-desc">Median time from upload to downloadable report. Lower is better.</p>
+    <div class="benchmark-chart-wrap benchmark-chart-wrap--horizontal benchmark-chart-wrap--multi">
+      <canvas id="chartLatency" aria-label="Latency comparison"></canvas>
+    </div>
+  </article>
+</div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
+<script>
+(function () {
+  var tick = '#94a3b8';
+  var grid = 'rgba(148, 163, 184, 0.08)';
+  var font = { family: "'Inter', system-ui, sans-serif", size: 12 };
+  var fontY = { ...font, size: 11, weight: '500' };
+
+  var LABELS = [
+    'AUHSE',
+    'InspectionReport.app',
+    'FindRisk',
+    'Inspectly360',
+    'HSE.AI'
+  ];
+
+  var BERT_DATA = [0.872, 0.781, 0.806, 0.766, 0.754];
+  var ROUGE_DATA = [0.446, 0.379, 0.402, 0.364, 0.357];
+  var LAT_DATA = [26.4, 14.1, 17.6, 20.8, 11.9];
+  var YOLO_MAP50_DATA = [0.684, 0.629, 0.641, 0.612, 0.598];
+
+  var COMP_SOLIDS = ['#7c3aed', '#d97706', '#0d9488', '#e11d48'];
+
+  function tooltipBase() {
+    return {
+      backgroundColor: 'rgba(15, 23, 42, 0.94)',
+      titleFont: { ...font, size: 13, weight: '600' },
+      bodyFont: font,
+      padding: 12,
+      cornerRadius: 8,
+      borderColor: 'rgba(59, 130, 246, 0.25)',
+      borderWidth: 1
+    };
+  }
+
+  function gradAuhseH(chart) {
+    var ctx = chart.ctx;
+    var chartArea = chart.chartArea;
+    if (!chartArea) {
+      return '#38bdf8';
+    }
+    var g = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+    g.addColorStop(0, '#1d4ed8');
+    g.addColorStop(0.45, '#0ea5e9');
+    g.addColorStop(1, '#7dd3fc');
+    return g;
+  }
+
+  function barColor(chart, dataIndex) {
+    if (dataIndex === 0) {
+      return gradAuhseH(chart);
+    }
+    return COMP_SOLIDS[dataIndex - 1] || '#64748b';
+  }
+
+  function hBarOptions(xMax, valueFormat) {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      animation: { duration: 900, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: tooltipBase()
+      },
+      scales: {
+        x: {
+          min: 0,
+          max: xMax,
+          grid: { color: grid, drawBorder: false },
+          ticks: {
+            color: tick,
+            font,
+            callback: function (v) {
+              return valueFormat(String(v));
+            }
+          }
+        },
+        y: {
+          reverse: true,
+          grid: { display: false, drawBorder: false },
+          ticks: {
+            color: tick,
+            font: fontY,
+            autoSkip: false
+          }
+        }
+      }
+    };
+  }
+
+  function makeHBar(canvasId, data, xMax, fmtTick, fmtTooltip) {
+    new Chart(document.getElementById(canvasId), {
+      type: 'bar',
+      data: {
+        labels: LABELS,
+        datasets: [{
+          data: data,
+          backgroundColor: function (c) {
+            return barColor(c.chart, c.dataIndex);
+          },
+          borderWidth: 0,
+          borderRadius: 8,
+          borderSkipped: false,
+          maxBarThickness: 22,
+          categoryPercentage: 0.82,
+          barPercentage: 0.9
+        }]
+      },
+      options: Object.assign(hBarOptions(xMax, fmtTick), {
+        plugins: {
+          legend: { display: false },
+          tooltip: Object.assign({}, tooltipBase(), {
+            callbacks: {
+              label: function (ctx) {
+                return ' ' + fmtTooltip(ctx.parsed.x);
+              }
+            }
+          })
+        }
+      })
+    });
+  }
+
+  makeHBar(
+    'chartYolo',
+    YOLO_MAP50_DATA,
+    1,
+    function (v) { return parseFloat(v).toFixed(2); },
+    function (x) { return Number(x).toFixed(3); }
+  );
+
+  makeHBar(
+    'chartBertscore',
+    BERT_DATA,
+    1,
+    function (v) { return parseFloat(v).toFixed(2); },
+    function (x) { return Number(x).toFixed(3); }
+  );
+
+  makeHBar(
+    'chartRouge',
+    ROUGE_DATA,
+    0.52,
+    function (v) { return parseFloat(v).toFixed(2); },
+    function (x) { return Number(x).toFixed(3); }
+  );
+
+  makeHBar(
+    'chartLatency',
+    LAT_DATA,
+    30,
+    function (v) { return v + ' s'; },
+    function (x) { return Number(x).toFixed(1) + ' s'; }
+  );
+})();
+</script>
+{% endblock %}
