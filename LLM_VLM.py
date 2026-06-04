@@ -5,7 +5,8 @@ import base64
 import argparse
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any
+from io import BytesIO
+from typing import Any, Dict, Optional
 
 import requests
 from PIL import Image
@@ -282,7 +283,62 @@ def set_cell_shading(cell, color):
     shading.set(qn('w:fill'), color)
     cell._tc.get_or_add_tcPr().append(shading)
 
-def write_hse_docx(hse: Dict[str, Any], out_path: str):
+
+DOCX_IMAGE_MAX_WIDTH = Inches(6.0)
+
+
+def _resolve_inspection_image_path(image_path: str, out_path: str) -> Optional[Path]:
+    """Prefer the given path; fall back to a copy beside the DOCX in outputs/."""
+    candidate = Path(image_path)
+    if candidate.is_file():
+        return candidate
+    alt = Path(out_path).resolve().parent / candidate.name
+    if alt.is_file():
+        return alt
+    return None
+
+
+def _embed_site_photo(d: Document, image_path: str, out_path: str) -> None:
+    """Insert the inspected site photo into the DOCX (centered, max width 6 in)."""
+    resolved = _resolve_inspection_image_path(image_path, out_path)
+    if not resolved:
+        return
+
+    section_para = d.add_paragraph()
+    section_run = section_para.add_run("1A. SITE PHOTOGRAPH")
+    section_run.font.size = Pt(16)
+    section_run.font.bold = True
+    section_run.font.color.rgb = RGBColor(0, 51, 102)
+
+    img_para = d.add_paragraph()
+    img_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+    try:
+        suffix = resolved.suffix.lower()
+        if suffix == ".webp":
+            with Image.open(resolved) as im:
+                im = im.convert("RGB")
+                buf = BytesIO()
+                im.save(buf, format="JPEG", quality=90)
+                buf.seek(0)
+                img_para.add_run().add_picture(buf, width=DOCX_IMAGE_MAX_WIDTH)
+        else:
+            img_para.add_run().add_picture(str(resolved), width=DOCX_IMAGE_MAX_WIDTH)
+    except Exception:
+        err_para = d.add_paragraph()
+        err_para.add_run(f"(Could not embed image: {resolved.name})").italic = True
+        return
+
+    cap = d.add_paragraph()
+    cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    cap_run = cap.add_run(f"Reference: {resolved.name}")
+    cap_run.font.size = Pt(9)
+    cap_run.font.italic = True
+    cap_run.font.color.rgb = RGBColor(128, 128, 128)
+    d.add_paragraph()
+
+
+def write_hse_docx(hse: Dict[str, Any], out_path: str, image_path: Optional[str] = None):
     d = Document()
     
     # Set default style
@@ -357,6 +413,9 @@ def write_hse_docx(hse: Dict[str, Any], out_path: str):
     row.cells[1].paragraphs[0].runs[0].font.size = Pt(11)
     
     d.add_paragraph()  # Spacing
+
+    if image_path:
+        _embed_site_photo(d, image_path, out_path)
     
     # ========== 2. INSPECTION SUMMARY ==========
     section_para = d.add_paragraph()
@@ -719,7 +778,7 @@ def generate_hse_report(
         encoding="utf-8-sig",
     )
 
-    write_hse_docx(obj, str(docx_path))
+    write_hse_docx(obj, str(docx_path), image_path=image_path)
 
     return {
         "hse": obj,
