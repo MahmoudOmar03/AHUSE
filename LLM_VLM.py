@@ -183,8 +183,7 @@ def build_hse_prompt(
     Names come from user; dates auto-filled (Asia/Riyadh).
     """
     now = _now_ksa()
-    date_time   = now.strftime("%Y-%m-%d %H:%M")  # for Project Information
-    verify_date = now.strftime("%Y-%m-%d")        # for Follow-up / Verification
+    date_time = now.strftime("%Y-%m-%d %H:%M")  # for Project Information
 
     schema = f"""
 Return VALID JSON ONLY. No markdown, no code fences, no comments, no trailing commas.
@@ -230,12 +229,10 @@ Schema EXACTLY:
     "short_term_measures": "string",
     "long_term_measures": "string"
   }},
-  "responsible_and_deadline": {{
-    "responsible_department_or_person": "string",
-    "due_date": "YYYY-MM-DD"
+  "responsible_party": {{
+    "responsible_department_or_person": "string"
   }},
   "follow_up_verification": {{
-    "verification_date": "YYYY-MM-DD",
     "verified_by": "string",
     "comments": "string"
   }}
@@ -246,7 +243,6 @@ MUST-USE CONSTANTS (copy EXACTLY into the JSON; do not alter):
 - project_information.site_location = "{site_location}"
 - project_information.date_time = "{date_time}"
 - project_information.inspection_by = "{inspection_by}"
-- follow_up_verification.verification_date = "{verify_date}"
 - follow_up_verification.verified_by = "{verified_by}"
 
 Instructions:
@@ -273,7 +269,6 @@ Instructions:
   * Severity: How severe would consequences be? (1=Minor, 5=Catastrophic)
   * Risk Level: Low (1-6), Medium (7-12), High (13-20), Critical (21-25)
 - For responsible party, suggest SPECIFIC roles (e.g., "Site Safety Manager", "Project Engineer", "Foreman")
-- For due dates, provide REALISTIC timelines based on urgency
 - KSA context (SBC standards, Civil Defense regulations, HRSD OSH requirements) should influence practical actions, but DO NOT name them explicitly.
 - Be PROFESSIONAL, TECHNICAL, and DETAILED. Avoid generic statements. Provide actionable, site-specific information.
 
@@ -658,36 +653,25 @@ def write_hse_docx(hse: Dict[str, Any], out_path: str, image_path: Optional[str]
     
     d.add_paragraph()  # Spacing
     
-    # ========== 7. RESPONSIBLE PARTY & DEADLINE ==========
+    # ========== 7. RESPONSIBLE PARTY ==========
     section_para = d.add_paragraph()
-    section_run = section_para.add_run('7. RESPONSIBLE PARTY & DEADLINE')
+    section_run = section_para.add_run('7. RESPONSIBLE PARTY')
     section_run.font.size = Pt(16)
     section_run.font.bold = True
     section_run.font.color.rgb = RGBColor(0, 51, 102)
     
-    rd = hse.get("responsible_and_deadline", {})
-    resp_table = d.add_table(rows=2, cols=2)
+    rd = hse.get("responsible_party") or hse.get("responsible_and_deadline", {})
+    resp_table = d.add_table(rows=1, cols=2)
     resp_table.style = 'Light Grid Accent 1'
     
     resp_table.columns[0].width = Inches(2.5)
     resp_table.columns[1].width = Inches(4.5)
     
-    # Responsible Department/Person
     row = resp_table.rows[0]
     row.cells[0].paragraphs[0].add_run('Responsible Department/Person:').bold = True
     row.cells[0].paragraphs[0].runs[0].font.size = Pt(11)
     row.cells[1].paragraphs[0].add_run(rd.get("responsible_department_or_person", "N/A"))
     row.cells[1].paragraphs[0].runs[0].font.size = Pt(11)
-    
-    # Due Date
-    row = resp_table.rows[1]
-    row.cells[0].paragraphs[0].add_run('Due Date:').bold = True
-    row.cells[0].paragraphs[0].runs[0].font.size = Pt(11)
-    due_date = rd.get("due_date", "N/A")
-    due_run = row.cells[1].paragraphs[0].add_run(str(due_date))
-    due_run.font.size = Pt(11)
-    due_run.font.bold = True
-    due_run.font.color.rgb = RGBColor(192, 0, 0)  # Red for urgency
     
     d.add_paragraph()  # Spacing
     
@@ -699,28 +683,21 @@ def write_hse_docx(hse: Dict[str, Any], out_path: str, image_path: Optional[str]
     section_run.font.color.rgb = RGBColor(0, 51, 102)
     
     fu = hse.get("follow_up_verification", {})
-    verify_table = d.add_table(rows=3, cols=2)
+    verify_table = d.add_table(rows=2, cols=2)
     verify_table.style = 'Light Grid Accent 1'
     
     verify_table.columns[0].width = Inches(2.5)
     verify_table.columns[1].width = Inches(4.5)
     
-    # Verification Date
-    row = verify_table.rows[0]
-    row.cells[0].paragraphs[0].add_run('Verification Date:').bold = True
-    row.cells[0].paragraphs[0].runs[0].font.size = Pt(11)
-    row.cells[1].paragraphs[0].add_run(fu.get("verification_date", "N/A"))
-    row.cells[1].paragraphs[0].runs[0].font.size = Pt(11)
-    
     # Verified By
-    row = verify_table.rows[1]
+    row = verify_table.rows[0]
     row.cells[0].paragraphs[0].add_run('Verified By:').bold = True
     row.cells[0].paragraphs[0].runs[0].font.size = Pt(11)
     row.cells[1].paragraphs[0].add_run(fu.get("verified_by", "N/A"))
     row.cells[1].paragraphs[0].runs[0].font.size = Pt(11)
     
     # Comments
-    row = verify_table.rows[2]
+    row = verify_table.rows[1]
     row.cells[0].paragraphs[0].add_run('Comments:').bold = True
     row.cells[0].paragraphs[0].runs[0].font.size = Pt(11)
     comments_text = fu.get("comments", "N/A")
@@ -790,9 +767,17 @@ def generate_hse_report(
     obj["project_information"]["date_time"] = now.strftime("%Y-%m-%d %H:%M")
 
     obj.setdefault("follow_up_verification", {})
-    obj["follow_up_verification"]["verification_date"] = now.strftime("%Y-%m-%d")
     obj["follow_up_verification"]["verified_by"] = verified_by
     obj["follow_up_verification"].setdefault("comments", "")
+    obj["follow_up_verification"].pop("verification_date", None)
+
+    legacy_rp = obj.pop("responsible_and_deadline", None)
+    rp = obj.get("responsible_party") or legacy_rp or {}
+    if not isinstance(rp, dict):
+        rp = {}
+    obj["responsible_party"] = {
+        "responsible_department_or_person": rp.get("responsible_department_or_person", ""),
+    }
 
     Path(json_path).write_text(
         json.dumps(obj, ensure_ascii=False, indent=2),
