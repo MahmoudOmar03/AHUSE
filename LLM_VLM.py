@@ -43,6 +43,29 @@ RAW_TXT     = "hse_raw.txt"
 JSON_PATH   = "hse_report.json"
 DOCX_PATH   = "hse_report.docx"
 MAX_RECORDS = 5
+DEFAULT_REPORT_STEM = "HSE_Report"
+
+
+def report_stem_from_project(project_name: str) -> str:
+    """Filesystem-safe base name for report files (DOCX/JSON/raw)."""
+    stem = (project_name or DEFAULT_REPORT_STEM).strip()
+    stem = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "", stem)
+    stem = re.sub(r"\s+", " ", stem).strip().strip(".")
+    if not stem:
+        stem = DEFAULT_REPORT_STEM
+    if len(stem) > 150:
+        stem = stem[:150].rstrip()
+    return stem
+
+
+def report_paths_for_project(out_dir: Path, project_name: str) -> tuple[Path, Path, Path]:
+    """Return (raw_path, json_path, docx_path) named after the project."""
+    stem = report_stem_from_project(project_name)
+    return (
+        out_dir / f"{stem}_raw.txt",
+        out_dir / f"{stem}.json",
+        out_dir / f"{stem}.docx",
+    )
 
 # ==============================
 # ---- OpenRouter helpers ------
@@ -736,9 +759,7 @@ def generate_hse_report(
     out_dir_path = Path(out_dir)
     out_dir_path.mkdir(parents=True, exist_ok=True)
 
-    raw_path = out_dir_path / RAW_TXT
-    json_path = out_dir_path / JSON_PATH
-    docx_path = out_dir_path / DOCX_PATH
+    raw_path, json_path, docx_path = report_paths_for_project(out_dir_path, project_name)
 
     prompt = build_hse_prompt(
         image_filename=Path(image_path).name,
